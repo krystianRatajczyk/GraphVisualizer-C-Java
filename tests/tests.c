@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define APP_PATH "../graph_layout"
+#define APP_PATH "../graphviz"
 #define GEN_PATH "./generator"
 
 int run_test(const char *test_name, const char *cmd, int expected_exit_code) {
@@ -36,7 +36,7 @@ int main() {
     passed += run_test("Obciazeniowy - 500 wezlow (FR)", cmd, 0);
     total++;
 
-    system(GEN_PATH " 2 1 1.0 5.0 test_2_nodes.txt > /dev/null");
+    system("echo 'e1 1 2 1.0' > test_2_nodes.txt");
     snprintf(cmd, sizeof(cmd), "%s -i test_2_nodes.txt -a tutte > /dev/null 2>&1", APP_PATH);
     passed += run_test("Krawedziowy - Zbyt maly graf (Tutte musi przerwac - Kod 3)", cmd, 3);
     total++;
