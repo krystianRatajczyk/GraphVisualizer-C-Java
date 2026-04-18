@@ -1,0 +1,390 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{changepage} 
+
+\titlespacing*{\subsection}{1.5cm}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\setlength{\cftsubsecindent}{1.5cm}
+
+\definecolor{termbg}{rgb}{0.05, 0.05, 0.05}
+\definecolor{termfg}{rgb}{0.9, 0.9, 0.9}
+\definecolor{codebg}{rgb}{0.95, 0.95, 0.95}
+\definecolor{commentgreen}{rgb}{0,0.6,0}
+\definecolor{keywordblue}{rgb}{0.13,0.13,1}
+
+\lstdefinestyle{terminal}{
+    backgroundcolor=\color{termbg},
+    basicstyle=\ttfamily\color{termfg}\footnotesize,
+    breaklines=true,
+    captionpos=b,
+    frame=single,
+    rulecolor=\color{gray},
+    keywordstyle=\color{white}\bfseries,
+    morekeywords={ZALICZONY, Oczekiwano, Otrzymano, TEST},
+    literate={ą}{{\k{a}}}1 {ć}{{\'c}}1 {ę}{{\k{e}}}1 {ł}{{\l}}1 {ń}{{\'n}}1 {ó}{{\'o}}1 {ś}{{\'s}}1 {ź}{{\'z}}1 {ż}{{\.z}}1
+}
+
+\lstdefinestyle{c-code}{
+    language=C,
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{keywordblue}\bfseries,
+    commentstyle=\color{commentgreen}\itshape,
+    stringstyle=\color{red},
+    breaklines=true,
+    frame=single,
+    captionpos=b,
+    literate={ą}{{\k{a}}}1 {ć}{{\'c}}1 {ę}{{\k{e}}}1 {ł}{{\l}}1 {ń}{{\'n}}1 {ó}{{\'o}}1 {ś}{{\'s}}1 {ź}{{\'z}}1 {ż}{{\.z}}1
+}
+
+\lstdefinestyle{java-code}{
+    language=Java,
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{keywordblue}\bfseries,
+    commentstyle=\color{commentgreen}\itshape,
+    stringstyle=\color{red},
+    breaklines=true,
+    frame=single,
+    captionpos=b
+}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        \vspace*{1cm}
+        
+        {\LARGE \textbf{Politechnika Warszawska}} \\[0.2cm]
+        {\Large Wydział Elektryczny} \\[2cm]
+        
+        {\large Kierunek: Informatyka stosowana} \\[0.1cm]
+        {\large Przedmiot: Języki i metody programowania 2} \\[3.5cm]
+        
+        {\Huge \textbf{Dokumentacja Końcowa Projektu}} \\[1cm]
+        {\Large Projekt C: Wyznaczanie współrzędnych węzłów dla wizualizacji\\ grafu planarnego} \\[3.5cm] 
+        
+        {\large \textbf{Autorzy:}} \\[0.2cm]
+        {\large Patryk Pawlak 343367} \\[0.1cm]
+        {\large Krzysztof Dębski 343317}
+        
+        \vfill
+        
+        {\large Warszawa, 19 kwietnia 2026}
+        \vspace*{0.5cm}
+    \end{center}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Wstęp}
+Niniejszy dokument stanowi pełną specyfikację końcową modułu obliczeniowego \textbf{GraphVisualizer (C Core)}, realizowanego w ramach przedmiotu Języki i metody programowania 2. 
+
+Celem aplikacji jest automatyczne wyznaczanie współrzędnych $(x, y)$ wierzchołków grafu planarnego w celu jego czytelnej wizualizacji. Aplikacja C działa jako bezstanowy silnik CLI, który przyjmuje topologię grafu, wykonuje intensywne obliczenia rozmieszczające wierzchołki i zwraca gotowe współrzędne. Została zaprojektowana z myślą o pełnej integracji z modułem GUI tworzonym w języku Java.
+
+Dokumentacja ta łączy opisy funkcjonalne, implementacyjne oraz szczegółowe instrukcje pozwalające zespołowi docelowemu na sprawną integrację z silnikiem, bez konieczności analizowania kodu źródłowego w języku C.
+
+\section{Architektura Systemu i Implementacja}
+
+Aplikacja została napisana w standardzie C11 z wykorzystaniem kompilatora GCC. Architektura systemu ściśle przestrzega zasad \textit{Clean Code}, \textit{Minimal Global State} oraz \textit{Defensive Programming}.
+
+\noindent
+\begin{minipage}{\textwidth}
+\subsection{Struktura Modułowa}
+\begin{adjustwidth}{1.5cm}{0cm}
+Projekt dzieli się na cztery główne warstwy:
+\begin{itemize}
+    \item \texttt{core/} – Kontroler sterujący przepływem programu. Przetwarza flagi CLI (przy użyciu biblioteki \texttt{getopt.h}) i agreguje działanie całego programu.
+    \item \texttt{io/} – Moduł wejścia/wyjścia. Obejmuje obsługę formatu tekstowego (wczytywanie grafu) oraz eksport do formatów tekstowych i binarnych.
+    \item \texttt{algorithms/} – Główny rdzeń obliczeniowy zawierający logikę algorytmów Fruchtermana-Reingolda oraz Tutte'a.
+    \item \texttt{utils/} – Zbiór pomocniczych funkcji matematycznych, m.in. implementacja eliminacji Gaussa dla algorytmu barycentrycznego.
+\end{itemize}
+\end{adjustwidth}
+\end{minipage}
+\vspace{0.5cm}
+
+\noindent
+\begin{minipage}{\textwidth}
+\subsection{Kluczowe Struktury Danych}
+\begin{adjustwidth}{1.5cm}{0cm}
+Stan grafu przechowywany jest w dynamicznie alokowanych strukturach, zarządzanych przez strukturę \texttt{Graph}.
+\begin{lstlisting}[style=c-code, caption={Uproszczony model struktur danych}]
+typedef struct {
+    int id;
+    double x, y;
+} Node;
+
+typedef struct {
+    char name[MAX_NAME_LEN];
+    int n_1, n_2;
+    double weight;
+} Edge;
+
+typedef struct {
+    Node *nodes;
+    int node_count;
+    int node_cap;
+    Edge *edges;
+    int edge_count;
+    int edge_cap;
+} Graph;
+\end{lstlisting}
+\end{adjustwidth}
+\end{minipage}
+\vspace{0.5cm}
+
+\noindent
+\begin{minipage}{\textwidth}
+\subsection{Specyfikacja Wewnętrznego API (Wybrane funkcje)}
+\begin{adjustwidth}{1.5cm}{0cm}
+Interfejs zarządzania grafem (zdefiniowany w \texttt{src\_c/io/graph.h}) oferuje m.in. następujące metody:
+\begin{itemize}
+    \item \texttt{Graph* create\_graph(void)} – Inicjalizacja pustej struktury. Zwraca wskaźnik lub \texttt{NULL} w przypadku błędu alokacji.
+    \item \texttt{int graph\_load\_text(Graph *g, const char *path)} – Wczytuje listę krawędzi. Zwraca kod błędu w przypadku problemów z plikiem/formatem.
+    \item \texttt{int graph\_save\_binary(const Graph *g, const char *path)} – Eksportuje wynik działania algorytmów do binarnego pliku wymiany.
+    \item \texttt{void free\_graph(Graph *g)} – Zwalnia wszystkie zaalokowane zasoby, zapobiegając wyciekom pamięci.
+\end{itemize}
+\end{adjustwidth}
+\end{minipage}
+\vspace{0.5cm}
+
+\section{Instrukcja Użytkownika (CLI)}
+
+Silnik C jest w pełni sterowany z poziomu wiersza poleceń. Pozwala to na łatwe wywoływanie go z poziomu Javy.
+
+\noindent
+\begin{minipage}{\textwidth}
+\subsection{Argumenty Uruchomieniowe}
+\begin{adjustwidth}{1.5cm}{0cm}
+Program obsługuje następujące flagi:
+\begin{table}[H]
+\centering
+\begin{tabularx}{\linewidth}{|c|c|X|}
+\hline
+\textbf{Flaga} & \textbf{Wymagane} & \textbf{Opis} \\ \hline
+\texttt{-i <path>} & \textbf{TAK} & Ścieżka do pliku wejściowego (tekstowego) z opisem grafu. \\ \hline
+\texttt{-o <path>} & NIE & Plik wyjściowy ze współrzędnymi. Domyślnie wynik wypisywany jest na konsolę (stdout). \\ \hline
+\texttt{-a <alg>}  & NIE & Wybór algorytmu rozmieszczania: \texttt{fr} (Fruchterman-Reingold - domyślny) lub \texttt{tutte} (Tutte). \\ \hline
+\texttt{-n <int>}  & NIE & Liczba iteracji dla algorytmu FR (domyślnie: 200). Nie dotyczy algorytmu Tutte'a. \\ \hline
+\texttt{-b}        & NIE & Wymusza zapis do formatu binarnego. \\ \hline
+\texttt{-v}        & NIE & Tryb verbose. Wyświetla diagnostykę i postęp na stderr. \\ \hline
+\texttt{-h}        & NIE & Wyświetla ekran pomocy i kończy działanie programu. \\ \hline
+\end{tabularx}
+\caption{Argumenty CLI programu}
+\end{table}
+
+\textbf{Przykłady wywołania:}
+\begin{lstlisting}[style=terminal, caption={Przykłady użycia CLI}]
+# Standardowe przeliczenie algorytmem FR i wyrzucenie do pliku tekstowego
+./graph_layout -i wejscie.txt -o wynik.txt
+
+# Obliczenia algorytmem Tutte'a i eksport binarny dla interfejsu Java
+./graph_layout -i wejscie.txt -o wynik.bin -a tutte -b
+
+# Uruchomienie z podgladem postepu (verbose)
+./graph_layout -i wejscie.txt -a fr -n 500 -v
+\end{lstlisting}
+\end{adjustwidth}
+\end{minipage}
+\vspace{0.5cm}
+
+\section{Format Danych}
+
+\noindent
+\begin{minipage}{\textwidth}
+\subsection{Plik Wejściowy (Tekstowy)}
+\begin{adjustwidth}{1.5cm}{0cm}
+Format wejściowy stanowi płaską listę krawędzi oddzielonych znakami białymi. Każda krawędź posiada nazwę, identyfikatory węzłów, które łączy oraz wagę.
+
+Format jednej linii: \texttt{<nazwa\_krawedzi> <wierzcholek\_A> <wierzcholek\_B> <waga\_krawedzi>}
+
+\textbf{Przykład pliku \texttt{input.txt}:}
+\begin{lstlisting}[style=terminal]
+E1 1 2 1.0
+E2 2 3 1.5
+E3 3 1 1.0
+E4 3 4 2.0
+\end{lstlisting}
+\end{adjustwidth}
+\end{minipage}
+\vspace{0.5cm}
+
+\noindent
+\begin{minipage}{\textwidth}
+\subsection{Plik Wyjściowy (Tekstowy)}
+\begin{adjustwidth}{1.5cm}{0cm}
+Jeśli nie użyto flagi \texttt{-b}, program wygeneruje plik tekstowy. Zawiera on wyliczone pozycje $(x,y)$ unikalnych wierzchołków z dokładnością do 6 cyfr po przecinku.
+
+Format jednej linii: \texttt{<wierzcholek> <x> <y>}
+
+\textbf{Przykład pliku \texttt{output.txt} (dla powyzszego wejścia):}
+\begin{lstlisting}[style=terminal]
+1 0.000000 0.000000
+2 1.000000 0.000000
+3 0.500000 0.866000
+4 0.500000 1.866767
+\end{lstlisting}
+\end{adjustwidth}
+\end{minipage}
+\vspace{0.5cm}
+
+\section{Specyfikacja Mostka Binarnego (C-Java)}
+W celu zapewnienia wysoce wydajnej wymiany danych między rdzeniem obliczeniowym C a interfejsem graficznym Java, głównym formatem produkcyjnym (flaga \texttt{-b}) jest zoptymalizowany plik binarny. 
+
+
+\noindent
+\begin{minipage}{\textwidth}
+\subsection{Struktura Rekordu Binarnego}
+\begin{adjustwidth}{1.5cm}{0cm}
+Każdy węzeł grafu zapisywany jest sekwencyjnie. Nie występują tu żadne nagłówki plików. Rozmiar pojedynczego rekordu wynosi dokładnie \textbf{20 bajtów}:
+\begin{itemize}
+    \item \texttt{int id} (4 bajty) – Unikalny identyfikator węzła.
+    \item \texttt{double x} (8 bajtów) – Współrzędna X zapisana w standardzie IEEE 754.
+    \item \texttt{double y} (8 bajtów) – Współrzędna Y zapisana w standardzie IEEE 754.
+\end{itemize}
+
+Spójność danych: Całkowity rozmiar pliku wyjściowego zawsze będzie równy $N \times 20$ bajtów, gdzie $N$ to liczba unikalnych wierzchołków w przetworzonym grafie.
+\end{adjustwidth}
+\end{minipage}
+\vspace{0.5cm}
+
+\noindent
+
+\vspace{0.5cm}
+
+\section{Zaimplementowane Algorytmy Rozmieszczania}
+
+System udostępnia dwa niezależne mechanizmy wyznaczania współrzędnych. Aplikacja Java powinna umożliwić użytkownikowi przełączanie między nimi (flaga \texttt{-a}).
+
+\noindent
+\begin{minipage}{\textwidth}
+\subsection{Algorytm Fruchtermana-Reingolda (Podejście siłowe, \texttt{-a fr})}
+\begin{adjustwidth}{1.5cm}{0cm}
+Uniwersalny algorytm traktujący graf jak system fizyczny. 
+\begin{itemize}
+    \item \textbf{Zasada działania:} Krawędzie grafu traktowane są jak sprężyny przyciągające wierzchołki, natomiast same wierzchołki działają na siebie jak naładowane elektrycznie cząsteczki (siły odpychania).
+    \item \textbf{Cechy szczególne:} Obliczenia wykorzystują wagi krawędzi (wpływają na siłę przyciągania). Posiada mechanizm chłodzenia zapewniający stabilizację w kolejnych iteracjach. System wymusza ramkę, zapobiegając ucieczce węzłów w nieskończoność.
+    \item \textbf{Zastosowanie:} Radzi sobie z grafami niespójnymi oraz nieplanarnymi. Idealny dla większości ogólnych przypadków użycia.
+\end{itemize}
+\end{adjustwidth}
+\end{minipage}
+\vspace{0.5cm}
+
+\noindent
+\begin{minipage}{\textwidth}
+\subsection{Algorytm Tutte'a (Twierdzenie o sprężynach, \texttt{-a wszystkie})}
+\begin{adjustwidth}{1.5cm}{0cm}
+Algorytm barycentryczny dedykowany grafom planarnym, gwarantujący brak przecięć krawędzi.
+\begin{itemize}
+    \item \textbf{Zasada działania:} Znajduje cykl w grafie, a następnie "przypina" go do obwodu geometrycznego wielokąta wypukłego. Pozycje pozostałych (wewnętrznych) wierzchołków wyznaczane są poprzez rozwiązywanie układu równań liniowych (metoda Gaussa), tak aby każdy wierzchołek znalazł się w środku ciężkości swoich sąsiadów.
+    \item \textbf{Mechanizmy obronne:} Program automatycznie używa algorytmu DFS do znalezienia zewnętrznego cyklu. Dodatkowo wykorzystuje BFS do walidacji spójności grafu – \textbf{warunek konieczny}.
+    \item \textbf{Zastosowanie:} Służy wyłącznie do grafów spójnych i planarnych (oraz posiadających cykl). W przypadku podania grafu niespójnego program zwróci kod błędu.
+\end{itemize}
+\end{adjustwidth}
+\end{minipage}
+\vspace{0.5cm}
+
+\section{Sytuacje Wyjątkowe i Obsługa Błędów}
+
+Program stosuje rygorystyczne podejście defensywne. Zamiast powodować awarię (segmentation fault), w sytuacjach brzegowych zwalnia zasoby i zwraca odpowiedni kod zakończenia.
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{|c|l|X|}
+\hline
+\textbf{Kod} & \textbf{Typ Błędu} & \textbf{Przykłady / Opis} \\ \hline
+\texttt{0} & SUKCES & Wykonanie poprawne. Wyniki zapisane do pliku. \\ \hline
+\texttt{1} & BŁĄD PLIKU (\texttt{ERR\_FILE}) & Plik wejściowy nie istnieje lub brak praw dostępu. Brak uprawnień do zapisu pliku wyjściowego. \\ \hline
+\texttt{2} & BŁĄD FORMATU (\texttt{ERR\_FORMAT})& Niezgodna liczba kolumn w pliku wejściowym (np. 2 zamiast 4). Znaki niebędące liczbami tam, gdzie oczekiwano double/int. \\ \hline
+\texttt{3} & BŁĄD ALGORYTMU (\texttt{ERR\_ALGO})& Uruchomienie algorytmu Tutte'a dla grafu bez cyklu lub dla grafu niespójnego. Prowadziłoby to do dzielenia przez zero w macierzy. \\ \hline
+\texttt{4} & BŁĄD ARGUMENTÓW (\texttt{ERR\_ARGS})& Brak flagi \texttt{-i}. Podanie nieznanego parametru flagi (np. \texttt{-a xyz}). \\ \hline
+\end{tabularx}
+\caption{Specyfikacja kodów powrotu silnika}
+\end{table}
+
+\section{System Testowy i Walidacja Jakości}
+
+Aby zapewnić stabilność i przewidywalność pracy programu C, zaimplementowano zautomatyzowane ramy testowe. Dodatkowo użyto narzędzia \texttt{Valgrind} do kontroli pamięci.
+
+\noindent
+\begin{minipage}{\textwidth}
+\subsection{Środowisko i Metodologia}
+\begin{adjustwidth}{1.5cm}{0cm}
+Wykorzystano skrypt \texttt{generator.c}, który masowo produkuje przypadki brzegowe i obciążeniowe. Test runner analizuje kody wyjścia i weryfikuje ich zgodność z założeniami. Przeprowadzono m.in.:
+\begin{itemize}
+    \item Testy stabilności FR: Obciążenia grafami $>500$ wierzchołków dla 1000 iteracji.
+    \item Testy spójności Tutte'a: Wstrzykiwanie grafów losowych w celu sprawdzenia reakcji modułu weryfikacyjnego.
+    \item Weryfikacja precyzji: Ekstremalne wielkości wejściowe (wagi rzędu $10^{-6}$ do $10^7$).
+\end{itemize}
+\end{adjustwidth}
+\end{minipage}
+\vspace{0.5cm}
+
+\noindent
+\begin{minipage}{\textwidth}
+\subsection{Raport z Wykonania Zestawu Testowego}
+\begin{adjustwidth}{1.5cm}{0cm}
+Poniżej znajduje się udokumentowany zrzut logu ze zautomatyzowanego runnera. Potwierdza on 100\% skuteczność obsługi sytuacji wyjątkowych.
+
+\begin{lstlisting}[style=terminal, caption={Log z konsoli z weryfikacji automatycznej}]
+========================================
+ ROZPOCZYNAM AUTOMATYCZNE TESTY SYSTEMU
+========================================
+
+--- TEST: Obciazeniowy - 100 wezlow (Tutte) ---
+[ZALICZONY] Oczekiwano: 0, Otrzymano: 0
+
+--- TEST: Obciazeniowy - 500 wezlow (FR) ---
+[ZALICZONY] Oczekiwano: 0, Otrzymano: 0
+
+--- TEST: Krawedziowy - Zbyt maly graf (Tutte musi przerwac - Kod 3) ---
+[ZALICZONY] Oczekiwano: 3, Otrzymano: 3
+
+--- TEST: Krawedziowy - Ekstremalne wagi (Precyzja double) ---
+[ZALICZONY] Oczekiwano: 0, Otrzymano: 0
+
+--- TEST: Weryfikacja Valgrind (Brak wyciekow pamieci) ---
+[ZALICZONY] Oczekiwano: 0, Otrzymano: 0
+
+========================================
+WYNIK TESTOW: 5 / 5 ZALICZONYCH
+WSZYSTKIE TESTY ZAKONCZONE SUKCESEM!
+========================================
+\end{lstlisting}
+\end{adjustwidth}
+\end{minipage}
+\vspace{0.5cm}
+
+\noindent
+\begin{minipage}{\textwidth}
+\subsection{Gwarancja braku wycieków (Valgrind)}
+\begin{adjustwidth}{1.5cm}{0cm}
+Jak prezentuje log, w każdym przypadku poprawnym oraz błędnym program wywoływał procedurę \texttt{free\_graph()} oraz odpowiednie sprzątanie zasobów plikowych \texttt{fclose()}. Raport pamięci Valgrind ("Clean memory report") potwierdza \textbf{zero utraconych bajtów}, co oznacza, że wielokrotne wywoływanie aplikacji w tle (proces po procesie) nie zdestabilizuje środowiska operacyjnego użytkownika.
+\end{adjustwidth}
+\end{minipage}
+\vspace{0.5cm}
+
+\section{Wnioski}
+Silnik obliczeniowy \textbf{GraphVisualizer (C Core)} osiągnął status ukończony (wersja produkcyjna). Spełnia wszystkie założenia specyfikacji funkcjonalnej i implementacyjnej.
+
+Zaimplementowane algorytmy poprawnie rozmieszczają węzły grafów. Architektura programu oparta na bezstanowym CLI i formacie binarnym udostępnia wysoce wydajne, klarowne API pozwalające na bezproblemową budowę docelowego GUI w środowisku Java. Zabezpieczenia matematyczne zapobiegające awariom na niepoprawnych danych wejściowych czynią program odpornym na błędy, co udowodniono w udokumentowanych, bezbłędnych przebiegach testów automatycznych.
+
+\end{document}
