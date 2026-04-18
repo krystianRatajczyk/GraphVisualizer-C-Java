@@ -60,7 +60,12 @@ int main(int argc, char *argv[]) {
   if (strcmp(algorithm, "tutte") == 0) {
     if (verbose)
       printf("Algorytm: Tutte\n");
-    run_tutte(graph);
+    int tutte_res = run_tutte(graph);
+    if (tutte_res != 0) {
+      fprintf(stderr, "Błąd: Algorytm Tutte'a zakończył się niepowodzeniem (kod: %d)\n", tutte_res);
+      free_graph(graph);
+      return tutte_res;
+    }
   } else {
     if (verbose)
       printf("Algorytm: FR (%d iteracji)\n", iterations);
