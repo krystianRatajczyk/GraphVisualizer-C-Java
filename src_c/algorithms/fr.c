@@ -59,9 +59,9 @@ void fr(Graph *g, int iterations, double width, double height, int verbose) {
       double d = vector_mag(sub);
       double force_val;
       if (ideal_dist > 0) {
-        force_val = d * d / ideal_dist;
+        force_val = (d * d / ideal_dist) * g->edges[j].weight;
       } else {
-        force_val = d * d;
+        force_val = (d * d) * g->edges[j].weight;
       }
       offset[v] = vector_sub(offset[v], vector_mul(direction, force_val));
       offset[u] = vector_add(offset[u], vector_mul(direction, force_val));

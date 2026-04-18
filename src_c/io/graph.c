@@ -114,7 +114,9 @@ int graph_save_binary(const Graph *g, const char *path) {
     return ERR_FILE;
   }
   for (int i = 0; i < g->node_count; i++) {
-    fwrite(&g->nodes[i], sizeof(Node), 1, f);
+    fwrite(&g->nodes[i].id, sizeof(int), 1, f);
+    fwrite(&g->nodes[i].x, sizeof(double), 1, f);
+    fwrite(&g->nodes[i].y, sizeof(double), 1, f);
   }
 
   fclose(f);
