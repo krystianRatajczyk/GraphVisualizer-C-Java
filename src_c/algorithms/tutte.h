@@ -3,6 +3,7 @@
 
 #include "../io/graph.h"
 
-void run_tutte(Graph *G);
+
+int run_tutte(Graph *G);
 
 #endif
