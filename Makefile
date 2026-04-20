@@ -14,7 +14,7 @@ SRCS = $(SRC_DIR)/core/main.c \
 
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
-TARGET = graphviz
+TARGET = graph_layout
 GEN_BIN = $(TEST_DIR)/generator
 TEST_BIN = $(TEST_DIR)/run_tests
 

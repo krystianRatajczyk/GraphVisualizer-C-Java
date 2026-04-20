@@ -1,0 +1,14 @@
+# Binaries
+graph_layout
+graphviz
+tests/generator
+tests/run_tests
+
+# Objects
+obj/
+
+# Temporary / Output files
+*.o
+*.txt
+*.bin
+!examples/*.txt

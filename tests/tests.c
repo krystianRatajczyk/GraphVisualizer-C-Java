@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define APP_PATH "../graphviz"
+#define APP_PATH "../graph_layout"
 #define GEN_PATH "./generator"
 
 int run_test(const char *test_name, const char *cmd, int expected_exit_code) {
