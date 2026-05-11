@@ -12,3 +12,5 @@ obj/
 *.txt
 *.bin
 !examples/*.txt
+java_app/out
+.idea
