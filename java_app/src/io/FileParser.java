@@ -10,16 +10,15 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /**
- * Parses a plain-text graph file with the following format:
+ * format:
+ * <p>
+ * VERTICES
+ * <id> <x> <y>
+ * ...
+ * EDGES
+ * <name> <sourceId> <targetId> <weight>
+ * ...
  *
- *   VERTICES
- *   <id> <x> <y>
- *   ...
- *   EDGES
- *   <sourceId> <targetId>
- *   ...
- *
- * Lines starting with '#' are treated as comments and ignored.
  */
 public class FileParser {
 
@@ -46,8 +45,10 @@ public class FileParser {
 
                 switch (current) {
                     case VERTICES -> parseVertex(line, graph);
-                    case EDGES    -> parseEdge(line, graph);
-                    default       -> { /* TODO: handle header/metadata lines if needed */ }
+                    case EDGES -> parseEdge(line, graph);
+                    default -> {
+                        continue;
+                    }
                 }
             }
         }
@@ -55,14 +56,13 @@ public class FileParser {
         return graph;
     }
 
-    // TODO: extend if vertex lines carry additional attributes (e.g. label, color)
     private void parseVertex(String line, Graph graph) {
         String[] parts = line.split("\\s+");
         if (parts.length < 3) throw new IllegalArgumentException("Bad vertex line: " + line);
 
-        int id    = Integer.parseInt(parts[0]);
-        double x  = Double.parseDouble(parts[1]);
-        double y  = Double.parseDouble(parts[2]);
+        int id = Integer.parseInt(parts[0]);
+        double x = Double.parseDouble(parts[1]);
+        double y = Double.parseDouble(parts[2]);
 
         graph.addVertex(new Vertex(id, x, y));
     }
@@ -71,9 +71,9 @@ public class FileParser {
         String[] parts = line.split("\\s+");
         if (parts.length < 4) throw new IllegalArgumentException("Bad edge line: " + line);
 
-        String name   = parts[0];
-        int srcId     = Integer.parseInt(parts[1]);
-        int dstId     = Integer.parseInt(parts[2]);
+        String name = parts[0];
+        int srcId = Integer.parseInt(parts[1]);
+        int dstId = Integer.parseInt(parts[2]);
         double weight = Double.parseDouble(parts[3]);
 
         Vertex src = graph.findById(srcId);
@@ -81,11 +81,11 @@ public class FileParser {
 
         if (src == null || dst == null) {
             throw new IllegalArgumentException(
-                "Edge references unknown vertex id(s): " + srcId + ", " + dstId);
+                    "Edge references unknown vertex id(s): " + srcId + ", " + dstId);
         }
 
         graph.addEdge(new Edge(name, src, dst, weight));
     }
 
-    private enum Section { NONE, VERTICES, EDGES }
+    private enum Section {NONE, VERTICES, EDGES}
 }

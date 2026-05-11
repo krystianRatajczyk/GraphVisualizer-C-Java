@@ -18,7 +18,7 @@ public class MainFrame extends JFrame {
         setLayout(new BorderLayout());
 
         setJMenuBar(buildMenuBar());
-        // Center panel reserved for the graph canvas (added later)
+
     }
 
     private JMenuBar buildMenuBar() {

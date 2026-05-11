@@ -30,7 +30,7 @@ public class MenuController {
             Graph graph = parser.loadFromFile(selected);
             System.out.printf("Graph loaded successfully: %d vertices, %d edges%n",
                     graph.getVertices().size(), graph.getEdges().size());
-            // TODO: hand the graph to the view for rendering
+
         } catch (IOException | IllegalArgumentException e) {
             JOptionPane.showMessageDialog(frame,
                     "Failed to load graph:\n" + e.getMessage(),
