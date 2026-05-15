@@ -13,4 +13,7 @@ obj/
 *.bin
 !examples/*.txt
 java_app/out
+res/*.txt
 .idea
+.vscode
+out

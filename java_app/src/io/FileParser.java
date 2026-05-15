@@ -9,48 +9,32 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-/**
- * format:
- * <p>
- * VERTICES
- * <id> <x> <y>
- * ...
- * EDGES
- * <name> <sourceId> <targetId> <weight>
- * ...
- *
- */
 public class FileParser {
 
-    public Graph loadFromFile(File file) throws IOException {
+    public Graph loadGraph(File inputFile, File outputFile) throws IOException {
         Graph graph = new Graph();
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(outputFile))) {
             String line;
-            Section current = Section.NONE;
-
             while ((line = reader.readLine()) != null) {
                 line = line.strip();
-
-                if (line.isEmpty() || line.startsWith("#")) continue;
-
-                if (line.equalsIgnoreCase("VERTICES")) {
-                    current = Section.VERTICES;
-                    continue;
-                }
-                if (line.equalsIgnoreCase("EDGES")) {
-                    current = Section.EDGES;
-                    continue;
-                }
-
-                switch (current) {
-                    case VERTICES -> parseVertex(line, graph);
-                    case EDGES -> parseEdge(line, graph);
-                    default -> {
-                        continue;
-                    }
-                }
+                parseVertex(line, graph);
             }
+        } catch (IllegalArgumentException e){
+            throw new IOException(e);
+        }
+
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile))) {
+            String line;
+            int lineNumber = 1;
+            while ((line = reader.readLine()) != null) {
+                line = line.strip();
+                parseEdge(line, graph, lineNumber);
+                lineNumber++;
+            }
+        } catch (IllegalArgumentException e){
+            throw new IOException(e);
         }
 
         return graph;
@@ -67,7 +51,7 @@ public class FileParser {
         graph.addVertex(new Vertex(id, x, y));
     }
 
-    private void parseEdge(String line, Graph graph) {
+    private void parseEdge(String line, Graph graph, int lineNumber) {
         String[] parts = line.split("\\s+");
         if (parts.length < 4) throw new IllegalArgumentException("Bad edge line: " + line);
 
@@ -81,11 +65,10 @@ public class FileParser {
 
         if (src == null || dst == null) {
             throw new IllegalArgumentException(
-                    "Edge references unknown vertex id(s): " + srcId + ", " + dstId);
+                    "Edge references unknown vertex id(s): " + srcId + ", " + dstId + ", line number: " + lineNumber);
         }
 
         graph.addEdge(new Edge(name, src, dst, weight));
     }
 
-    private enum Section {NONE, VERTICES, EDGES}
 }

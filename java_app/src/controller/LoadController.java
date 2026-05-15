@@ -1,6 +1,7 @@
 package controller;
 
 import io.FileParser;
+import model.Config;
 import model.Graph;
 import view.MainFrame;
 
@@ -9,15 +10,15 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.io.IOException;
 
-public class MenuController {
+public class LoadController {
     private final MainFrame frame;
     private final FileParser parser = new FileParser();
 
-    public MenuController(MainFrame frame) {
+    public LoadController(MainFrame frame) {
         this.frame = frame;
     }
 
-    public void onLoadGraph() {
+    public void onLoadInputFile(Config config) {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Load Graph File");
         chooser.setFileFilter(new FileNameExtensionFilter("Text files (*.txt)", "txt"));
@@ -26,16 +27,6 @@ public class MenuController {
         if (result != JFileChooser.APPROVE_OPTION) return;
 
         File selected = chooser.getSelectedFile();
-        try {
-            Graph graph = parser.loadFromFile(selected);
-            System.out.printf("Graph loaded successfully: %d vertices, %d edges%n",
-                    graph.getVertices().size(), graph.getEdges().size());
-
-        } catch (IOException | IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(frame,
-                    "Failed to load graph:\n" + e.getMessage(),
-                    "Load Error",
-                    JOptionPane.ERROR_MESSAGE);
-        }
+        config.setInputFile(selected);
     }
 }

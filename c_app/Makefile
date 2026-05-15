@@ -41,3 +41,4 @@ $(TEST_BIN): $(TEST_DIR)/tests.c
 clean:
 	rm -rf $(OBJ_DIR) $(TARGET) $(GEN_BIN) $(TEST_BIN)
 	rm -f $(TEST_DIR)/test_*.txt $(TEST_DIR)/out_*.txt
+	rm -f ../java_app/res/*.txt
