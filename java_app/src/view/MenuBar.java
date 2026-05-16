@@ -16,14 +16,14 @@ public class MenuBar {
         this.parent = parent;
     }
 
-    public JMenuBar buildMenuBar(Config config, LoadController loadController, AlgorithmController algorithmController) {
+    public JMenuBar buildMenuBar(Config config, LoadController loadController, AlgorithmController algorithmController, Canvas canvas) {
         JMenuBar menuBar = new JMenuBar();
         menuBar.setLayout(new FlowLayout(FlowLayout.LEFT));
 
         String[] algorithms = {"Fruchterman-Reingold", "Tutte"};
         JComboBox algorithm = new JComboBox(algorithms);
 
-        JButton generateButton = getGenerateButton(algorithm, config, algorithmController);
+        JButton generateButton = getGenerateButton(algorithm, config, algorithmController, canvas);
         JButton loadButton = getLoadButton(config, loadController);
 
         menuBar.add(loadButton);
@@ -50,7 +50,7 @@ public class MenuBar {
         return loadButton;
     }
 
-    private JButton getGenerateButton(JComboBox algorithm, Config config, AlgorithmController algorithmController) {
+    private JButton getGenerateButton(JComboBox algorithm, Config config, AlgorithmController algorithmController, Canvas canvas) {
         JButton generateButton = new JButton("Generate");
 
         generateButton.addActionListener(e -> {
@@ -67,6 +67,7 @@ public class MenuBar {
                     JOptionPane.showMessageDialog(parent,
                             "Graph loaded successfully !\n" + "Edges: " + graph.getEdges().size() +
                                     " Vertices: " + graph.getVertices().size(), "Info", JOptionPane.PLAIN_MESSAGE);
+                    canvas.setGraph(graph);
                 }
             } catch (IOException exception) {
                 JOptionPane.showMessageDialog(parent, exception.getMessage(), "Runtime error", JOptionPane.PLAIN_MESSAGE);

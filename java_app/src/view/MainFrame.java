@@ -21,12 +21,14 @@ public class MainFrame extends JFrame {
         config = new Config();
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(900, 650);
+        setSize(1200, 850);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        MenuBar menuBar = new MenuBar(this);
-        setJMenuBar(menuBar.buildMenuBar(config, loadController, algorithmController));
+        Canvas canvas = new Canvas();
+        add(canvas);
 
+        MenuBar menuBar = new MenuBar(this);
+        setJMenuBar(menuBar.buildMenuBar(config, loadController, algorithmController, canvas));
     }
 }
