@@ -8,14 +8,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 
 public class Canvas extends JPanel {
     private Graph graph;
     private final int padding = 30;
     private double offsetX, offsetY, scale, yMin, xMin;
     private double panX, panY;
+    private double zoomFactor = 1.0;
     private Point dragStart;
-
 
     public Canvas() {
         MouseAdapter mouseAdapter = new MouseAdapter() {
@@ -27,21 +28,34 @@ public class Canvas extends JPanel {
             @Override
             public void mouseDragged(MouseEvent e) {
                 if (dragStart == null) return;
-                System.out.println("X: " + dragStart.getX() + "Y: " + dragStart.getY());
                 panX += e.getX() - dragStart.x;
                 panY += e.getY() - dragStart.y;
                 dragStart = e.getPoint();
                 repaint();
             }
+
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if (graph == null) return;
+                double ratio = e.getWheelRotation() < 0 ? 1.1 : 0.9;
+                double mx = e.getX();
+                double my = e.getY();
+                panX = (mx - offsetX) * (1 - ratio) + panX * ratio;
+                panY = (my - getHeight() + offsetY) * (1 - ratio) + panY * ratio;
+                zoomFactor *= ratio;
+                repaint();
+            }
         };
         addMouseListener(mouseAdapter);
         addMouseMotionListener(mouseAdapter);
+        addMouseWheelListener(mouseAdapter);
     }
 
     public void setGraph(Graph graph) {
         this.graph = graph;
         panX = 0;
         panY = 0;
+        zoomFactor = 1.0;
         double xMax = Double.MIN_VALUE, xMin = Double.MAX_VALUE;
         double yMax = Double.MIN_VALUE, yMin = Double.MAX_VALUE;
 
@@ -76,11 +90,11 @@ public class Canvas extends JPanel {
     }
 
     private int scaleX(double x) {
-        return (int) (offsetX + (x - xMin) * scale + panX);
+        return (int) (offsetX + (x - xMin) * scale * zoomFactor + panX);
     }
 
     private int scaleY(double y) {
-        return (int) (getHeight() - offsetY - (y - yMin) * scale + panY);
+        return (int) (getHeight() - offsetY - (y - yMin) * scale * zoomFactor + panY);
     }
 
     @Override
@@ -97,6 +111,9 @@ public class Canvas extends JPanel {
 
         for (Vertex v : graph.getVertices()) {
             int x = scaleX(v.getX()), y = scaleY(v.getY());
+
+            float hue = 0.66f - (graph.getAdj().get(v.getId()).size() / (float) graph.getMaxDegree()) * 0.66f;
+            g.setColor(Color.getHSBColor(hue, 1f, 0.85f));
             g.fillOval(x - 5, y - 5, 10, 10);
         }
     }

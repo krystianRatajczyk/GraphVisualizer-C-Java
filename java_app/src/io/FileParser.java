@@ -3,6 +3,7 @@ package io;
 import model.Edge;
 import model.Graph;
 import model.Vertex;
+import model.Config;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,7 +12,9 @@ import java.io.IOException;
 
 public class FileParser {
 
-    public Graph loadGraph(File inputFile, File outputFile) throws IOException {
+    public Graph loadGraph(Config config) throws IOException {
+        File outputFile = config.getOutputFile();
+        File inputFile = config.getInputFile();
         Graph graph = new Graph();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(outputFile))) {
@@ -59,6 +62,9 @@ public class FileParser {
         int srcId = Integer.parseInt(parts[1]);
         int dstId = Integer.parseInt(parts[2]);
         double weight = Double.parseDouble(parts[3]);
+
+        graph.addVertex(srcId, dstId);
+        graph.addVertex(dstId, srcId);
 
         Vertex src = graph.findById(srcId);
         Vertex dst = graph.findById(dstId);

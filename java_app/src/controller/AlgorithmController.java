@@ -34,7 +34,7 @@ public class AlgorithmController {
                     "-i", config.getInputFile().getAbsolutePath(),
                     "-o", outputFile.getAbsolutePath());
             FileParser parser = new FileParser();
-            Graph graph = parser.loadGraph(config.getInputFile(), config.getOutputFile());
+            Graph graph = parser.loadGraph(config);
             System.out.println("Graph loaded succesfully!" + " edges: " + graph.getEdges().size() + " vertices: " + graph.getEdges().size());
             return graph;
         } catch (IOException e) {
