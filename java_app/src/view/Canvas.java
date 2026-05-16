@@ -6,15 +6,42 @@ import model.Vertex;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class Canvas extends JPanel {
     private Graph graph;
     private final int padding = 30;
     private double offsetX, offsetY, scale, yMin, xMin;
+    private double panX, panY;
+    private Point dragStart;
 
+
+    public Canvas() {
+        MouseAdapter mouseAdapter = new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                dragStart = e.getPoint();
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (dragStart == null) return;
+                System.out.println("X: " + dragStart.getX() + "Y: " + dragStart.getY());
+                panX += e.getX() - dragStart.x;
+                panY += e.getY() - dragStart.y;
+                dragStart = e.getPoint();
+                repaint();
+            }
+        };
+        addMouseListener(mouseAdapter);
+        addMouseMotionListener(mouseAdapter);
+    }
 
     public void setGraph(Graph graph) {
         this.graph = graph;
+        panX = 0;
+        panY = 0;
         double xMax = Double.MIN_VALUE, xMin = Double.MAX_VALUE;
         double yMax = Double.MIN_VALUE, yMin = Double.MAX_VALUE;
 
@@ -49,11 +76,11 @@ public class Canvas extends JPanel {
     }
 
     private int scaleX(double x) {
-        return (int) (offsetX + (x - xMin) * scale);
+        return (int) (offsetX + (x - xMin) * scale + panX);
     }
 
     private int scaleY(double y) {
-        return (int) (getHeight() - offsetY - (y - yMin) * scale);
+        return (int) (getHeight() - offsetY - (y - yMin) * scale + panY);
     }
 
     @Override
