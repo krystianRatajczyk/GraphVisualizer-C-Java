@@ -11,13 +11,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AlgorithmController {
-    public void runAlgorithm(Config config) throws IOException {
+    public Graph runAlgorithm(Config config) throws IOException {
         String fullName = config.getInputFile().getName();
         int dotIndex = fullName.lastIndexOf('.');
         if (dotIndex >= 0) {
             fullName = fullName.substring(0, dotIndex);
         }
-
 
         File cAppDir = new File("c_app").getCanonicalFile();
         File resDir = new File("java_app/res");
@@ -37,8 +36,9 @@ public class AlgorithmController {
             FileParser parser = new FileParser();
             Graph graph = parser.loadGraph(config.getInputFile(), config.getOutputFile());
             System.out.println("Graph loaded succesfully!" + " edges: " + graph.getEdges().size() + " vertices: " + graph.getEdges().size());
+            return graph;
         } catch (IOException e) {
-            throw new IOException(e);
+            throw new IOException("File is in wrong format");
         }
 
 
