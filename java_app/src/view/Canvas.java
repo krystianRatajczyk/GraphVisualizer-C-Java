@@ -19,6 +19,7 @@ public class Canvas extends JPanel {
     private Point dragStart;
     private final int radius = 10;
     private Vertex hoveredVertex = null;
+    private Vertex draggingVertex = null;
 
     public Canvas() {
         MouseAdapter mouseAdapter = new MouseAdapter() {
@@ -50,14 +51,29 @@ public class Canvas extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 dragStart = e.getPoint();
+                draggingVertex = hoveredVertex;
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                draggingVertex = null;
+                dragStart = null;
             }
 
             @Override
             public void mouseDragged(MouseEvent e) {
                 if (dragStart == null) return;
-                panX += e.getX() - dragStart.x;
-                panY += e.getY() - dragStart.y;
+                int dx = e.getX() - dragStart.x;
+                int dy = e.getY() - dragStart.y;
                 dragStart = e.getPoint();
+                System.out.println(dx + " : " + dy);
+                if (draggingVertex != null) {
+                    draggingVertex.setX(draggingVertex.getX() + dx / (scale * zoomFactor));
+                    draggingVertex.setY(draggingVertex.getY() - dy / (scale * zoomFactor));
+                } else {
+                    panX += dx;
+                    panY += dy;
+                }
                 repaint();
             }
 
