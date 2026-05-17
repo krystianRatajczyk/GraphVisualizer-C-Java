@@ -17,9 +17,36 @@ public class Canvas extends JPanel {
     private double panX, panY;
     private double zoomFactor = 1.0;
     private Point dragStart;
+    private final int radius = 10;
+    private Vertex hoveredVertex = null;
 
     public Canvas() {
         MouseAdapter mouseAdapter = new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (graph == null) {
+                    return;
+                }
+
+                int mouseX = e.getX();
+                int mouseY = e.getY();
+
+                hoveredVertex = null;
+
+                for (Vertex v : graph.getVertices()) {
+                    int scaledX = scaleX(v.getX());
+                    int scaledY = scaleY(v.getY());
+                    int dx = mouseX - scaledX;
+                    int dy = mouseY - scaledY;
+                    if (dx * dx + dy * dy <= radius * radius) {
+                        hoveredVertex = v;
+                        break;
+                    }
+                }
+
+                repaint();
+            }
+
             @Override
             public void mousePressed(MouseEvent e) {
                 dragStart = e.getPoint();
@@ -103,10 +130,20 @@ public class Canvas extends JPanel {
 
         if (graph == null) return;
 
+        Graphics2D g2 = (Graphics2D) g;
+
         for (Edge e : graph.getEdges()) {
             int x1 = scaleX(e.getSource().getX()), y1 = scaleY(e.getSource().getY());
             int x2 = scaleX(e.getTarget().getX()), y2 = scaleY(e.getTarget().getY());
-            g.drawLine(x1, y1, x2, y2);
+
+            if (e.getSource() == hoveredVertex || e.getTarget() == hoveredVertex) {
+                g2.setColor(Color.BLACK);
+            } else {
+                g2.setColor(Color.LIGHT_GRAY);
+            }
+
+            g2.setStroke(new BasicStroke(2f));
+            g2.drawLine(x1, y1, x2, y2);
         }
 
         for (Vertex v : graph.getVertices()) {
@@ -114,7 +151,7 @@ public class Canvas extends JPanel {
 
             float hue = 0.66f - (graph.getAdj().get(v.getId()).size() / (float) graph.getMaxDegree()) * 0.66f;
             g.setColor(Color.getHSBColor(hue, 1f, 0.85f));
-            g.fillOval(x - 5, y - 5, 10, 10);
+            g.fillOval(x - 5, y - 5, radius, radius);
         }
     }
 }
