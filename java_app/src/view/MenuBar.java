@@ -20,14 +20,10 @@ public class MenuBar {
         JMenuBar menuBar = new JMenuBar();
         menuBar.setLayout(new FlowLayout(FlowLayout.LEFT));
 
-        String[] algorithms = {"Fruchterman-Reingold", "Tutte"};
-        JComboBox algorithm = new JComboBox(algorithms);
-
-        JButton generateButton = getGenerateButton(algorithm, config, algorithmController);
+        JButton generateButton = getGenerateButton(config, algorithmController);
         JButton loadButton = getLoadButton(config, loadController);
 
         menuBar.add(loadButton);
-        menuBar.add(algorithm);
         menuBar.add(generateButton);
 
         return menuBar;
@@ -50,7 +46,7 @@ public class MenuBar {
         return loadButton;
     }
 
-    private JButton getGenerateButton(JComboBox algorithm, Config config, AlgorithmController algorithmController) {
+    private JButton getGenerateButton(Config config, AlgorithmController algorithmController) {
         JButton generateButton = new JButton("Generate");
 
         generateButton.addActionListener(e -> {
@@ -58,7 +54,10 @@ public class MenuBar {
                 JOptionPane.showMessageDialog(parent, "Choose file first", "No file", JOptionPane.PLAIN_MESSAGE);
                 return;
             }
-            config.setAlgorithm((String) algorithm.getSelectedItem());
+            if (config.getAlgorithm() == null || config.getAlgorithm().isEmpty()) {
+                JOptionPane.showMessageDialog(parent, "Choose algorithm variant in the Control Panel", "No algorithm", JOptionPane.PLAIN_MESSAGE);
+                return;
+            }
 
             try {
                 Graph graph = algorithmController.runAlgorithm(config);
