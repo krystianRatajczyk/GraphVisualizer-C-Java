@@ -25,10 +25,13 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        Canvas canvas = new Canvas();
-        add(canvas);
+        Canvas canvas = new Canvas(config);
+        Sidebar sidebar = new Sidebar(this);
 
-        MenuBar menuBar = new MenuBar(this);
-        setJMenuBar(menuBar.buildMenuBar(config, loadController, algorithmController, canvas));
+        add(canvas);
+        add(sidebar.buildSidebar(config, algorithmController, canvas), BorderLayout.EAST);
+
+        MenuBar menuBar = new MenuBar();
+        setJMenuBar(menuBar.buildMenuBar(config, loadController));
     }
 }

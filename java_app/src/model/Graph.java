@@ -28,5 +28,4 @@ public class Graph {
                 .findFirst()
                 .orElse(null);
     }
-
 }

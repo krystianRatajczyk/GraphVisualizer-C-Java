@@ -1,5 +1,6 @@
 package view;
 
+import model.Config;
 import model.Edge;
 import model.Graph;
 import model.Vertex;
@@ -12,16 +13,17 @@ import java.awt.event.MouseWheelEvent;
 
 public class Canvas extends JPanel {
     private Graph graph;
-    private final int padding = 30;
     private double offsetX, offsetY, scale, yMin, xMin;
     private double panX, panY;
     private double zoomFactor = 1.0;
     private Point dragStart;
-    private final int radius = 10;
+    private final int radius = 20;
     private Vertex hoveredVertex = null;
     private Vertex draggingVertex = null;
+    private final Config config;
 
-    public Canvas() {
+    public Canvas(Config config) {
+        this.config = config;
         MouseAdapter mouseAdapter = new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -115,6 +117,7 @@ public class Canvas extends JPanel {
         if (deltaX == 0) deltaX = 1;
         if (deltaY == 0) deltaY = 1;
 
+        int padding = 30;
         int usableWidth = getWidth() - (2 * padding);
         int usableHeight = getHeight() - (2 * padding);
 
@@ -147,15 +150,35 @@ public class Canvas extends JPanel {
         if (graph == null) return;
 
         Graphics2D g2 = (Graphics2D) g;
+        g.setFont(new Font("Arial", Font.BOLD, 13));
 
         for (Edge e : graph.getEdges()) {
             int x1 = scaleX(e.getSource().getX()), y1 = scaleY(e.getSource().getY());
             int x2 = scaleX(e.getTarget().getX()), y2 = scaleY(e.getTarget().getY());
 
-            if (e.getSource() == hoveredVertex || e.getTarget() == hoveredVertex) {
+            Vertex source = e.getSource();
+            Vertex target = e.getTarget();
+
+            if (source == hoveredVertex || target == hoveredVertex) {
                 g2.setColor(Color.BLACK);
             } else {
                 g2.setColor(Color.LIGHT_GRAY);
+            }
+
+            if (config.getShowEdgeNames()) {
+                int edgeNameX = scaleX((source.getX() + target.getX()) / 2);
+                int edgeNameY = scaleY((source.getY() + target.getY()) / 2);
+
+                String text = String.valueOf(e.getName());
+                g.drawString(text, edgeNameX, edgeNameY);
+            }
+
+            if (config.getShowEdgeWeights()) {
+                int edgeWeightX = scaleX((source.getX() + target.getX()) / 2);
+                int edgeWeightY = scaleY((source.getY() + target.getY()) / 2);
+
+                String text = String.valueOf(e.getWeight());
+                g.drawString(text, edgeWeightX, edgeWeightY);
             }
 
             g2.setStroke(new BasicStroke(2f));
@@ -167,7 +190,14 @@ public class Canvas extends JPanel {
 
             float hue = 0.66f - (graph.getAdj().get(v.getId()).size() / (float) graph.getMaxDegree()) * 0.66f;
             g.setColor(Color.getHSBColor(hue, 1f, 0.85f));
-            g.fillOval(x - 5, y - 5, radius, radius);
+            g.fillOval(x - radius / 2, y - radius / 2, radius, radius);
+
+            if (config.getShowIds()) {
+                g.setColor(Color.WHITE);
+                String text = String.valueOf(v.getId());
+                g.drawString(text, x + (text.length() > 1 ? -7 : -3), y + 5);
+            }
+
         }
     }
 }
