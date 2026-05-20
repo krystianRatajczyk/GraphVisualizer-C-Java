@@ -164,21 +164,23 @@ public class Canvas extends JPanel {
             } else {
                 g2.setColor(Color.LIGHT_GRAY);
             }
+            double dx = x2 - x1, dy = y2 - y1;
+            double l = Math.sqrt(dx * dx + dy * dy);
+            int midX = (x2 + x1) / 2;
+            int midY = (y2 + y1) / 2;
+            int distance = 15;
 
-            if (config.getShowEdgeNames()) {
-                int edgeNameX = scaleX((source.getX() + target.getX()) / 2);
-                int edgeNameY = scaleY((source.getY() + target.getY()) / 2);
+            double perpX = (-dy / l) * distance;
+            double perpY = (dx / l) * distance;
 
+            if (l != 0 && config.getShowEdgeNames()) {
                 String text = String.valueOf(e.getName());
-                g.drawString(text, edgeNameX, edgeNameY);
+                g.drawString(text, (int) (midX + perpX), (int) (midY + perpY));
             }
 
             if (config.getShowEdgeWeights()) {
-                int edgeWeightX = scaleX((source.getX() + target.getX()) / 2);
-                int edgeWeightY = scaleY((source.getY() + target.getY()) / 2);
-
                 String text = String.valueOf(e.getWeight());
-                g.drawString(text, edgeWeightX, edgeWeightY);
+                g.drawString(text, (int) (midX - perpX), (int) (midY - perpY));
             }
 
             g2.setStroke(new BasicStroke(2f));
