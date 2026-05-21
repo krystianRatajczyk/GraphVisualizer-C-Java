@@ -68,7 +68,7 @@ public class Canvas extends JPanel {
                 int dx = e.getX() - dragStart.x;
                 int dy = e.getY() - dragStart.y;
                 dragStart = e.getPoint();
-                System.out.println(dx + " : " + dy);
+
                 if (draggingVertex != null) {
                     draggingVertex.setX(draggingVertex.getX() + dx / (scale * zoomFactor));
                     draggingVertex.setY(draggingVertex.getY() - dy / (scale * zoomFactor));

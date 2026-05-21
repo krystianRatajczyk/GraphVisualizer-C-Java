@@ -56,7 +56,7 @@ public class FileParser {
 
     private void parseEdge(String line, Graph graph, int lineNumber) {
         String[] parts = line.split("\\s+");
-        if (parts.length < 4) throw new IllegalArgumentException("Bad edge line: " + line);
+        if (parts.length < 4) throw new IllegalArgumentException("Bad edge: " + line +", Number of line:" + lineNumber);
 
         String name = parts[0];
         int srcId = Integer.parseInt(parts[1]);

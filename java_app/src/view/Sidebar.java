@@ -109,6 +109,41 @@ public class Sidebar extends JPanel {
 
         return section;
     }
+    private JPanel buildDegreeScale() {
+        JPanel section = new JPanel(new BorderLayout());
+        section.setOpaque(false);
+        section.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel degreeLabel = new JLabel("Vertex Degree");
+        degreeLabel.setFont(degreeLabel.getFont().deriveFont(16f));
+        degreeLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+
+        JPanel gradient = new JPanel() {
+            @Override
+            public void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                int w = getWidth();
+                for (int i = 0; i < w; i++) {
+                    float t = (float) i / (w - 1);
+                    g.setColor(Color.getHSBColor(0.66f - t * 0.66f, 1f, 0.85f));
+                    g.fillRect(i, 0, 1, getHeight());
+                }
+            }
+        };
+
+        JPanel labels = new JPanel(new BorderLayout());
+        labels.setOpaque(false);
+        labels.add(new JLabel("Less"), BorderLayout.WEST);
+        labels.add(new JLabel("More"), BorderLayout.EAST);
+
+        section.add(degreeLabel, BorderLayout.NORTH);
+        section.add(gradient, BorderLayout.CENTER);
+        section.add(labels, BorderLayout.SOUTH);
+
+
+
+        return section;
+    }
 
     public JPanel buildSidebar(Config config, AlgorithmController algorithmController, Canvas canvas) {
         setLayout(new BorderLayout());
@@ -117,6 +152,7 @@ public class Sidebar extends JPanel {
 
         stackWrapper.add(buildAlgorithmSection(config, algorithmController, canvas));
         stackWrapper.add(buildControlsSection(config, canvas));
+        stackWrapper.add(buildDegreeScale());
 
         stackWrapper.setOpaque(false);
 

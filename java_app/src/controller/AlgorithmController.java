@@ -7,6 +7,7 @@ import model.Graph;
 import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ public class AlgorithmController {
             System.out.println("Graph loaded succesfully!" + " edges: " + graph.getEdges().size() + " vertices: " + graph.getEdges().size());
             return graph;
         } catch (IOException e) {
-            throw new IOException("File is in wrong format");
+            throw new IOException(e.getMessage());
         }
 
 
@@ -52,7 +53,7 @@ public class AlgorithmController {
         try {
             int exitCode = pb.start().waitFor();
             if (exitCode != 0) {
-                System.out.println("Command failed (exit " + exitCode + "): " + String.join(" ", command));
+                throw new IOException("Command failed (exit code " + exitCode + ")");
             }
 
         } catch (IOException e) {
