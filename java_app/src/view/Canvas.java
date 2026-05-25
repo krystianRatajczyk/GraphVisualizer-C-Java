@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.util.function.Consumer;
 
 public class Canvas extends JPanel {
     private Graph graph;
@@ -21,6 +22,17 @@ public class Canvas extends JPanel {
     private Vertex hoveredVertex = null;
     private Vertex draggingVertex = null;
     private final Config config;
+    private Consumer<Boolean> onGraphSet;
+
+    public void setOnGraphSet(Consumer<Boolean> onGraphSet) {
+        this.onGraphSet = onGraphSet;
+    }
+
+    public void clear() {
+        this.graph = null;
+        if (onGraphSet != null) onGraphSet.accept(false);
+        repaint();
+    }
 
     public Canvas(Config config) {
         this.config = config;
@@ -98,6 +110,7 @@ public class Canvas extends JPanel {
 
     public void setGraph(Graph graph) {
         this.graph = graph;
+        if (onGraphSet != null) onGraphSet.accept(true);
         panX = 0;
         panY = 0;
         zoomFactor = 1.0;

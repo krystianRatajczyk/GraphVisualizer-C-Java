@@ -33,7 +33,7 @@ public class Sidebar extends JPanel {
 
                 if (graph != null) {
                     JOptionPane.showMessageDialog(parent,
-                            "Graph loaded successfully !\n" + "Edges: " + graph.getEdges().size() +
+                            "Graph generated successfully !\n" + "Edges: " + graph.getEdges().size() +
                                     " Vertices: " + graph.getVertices().size(), "Info", JOptionPane.PLAIN_MESSAGE);
                     canvas.setGraph(graph);
                 }

@@ -2,6 +2,7 @@ package view;
 
 import controller.AlgorithmController;
 import controller.LoadController;
+import controller.SaveController;
 import model.Config;
 import model.Graph;
 
@@ -12,12 +13,14 @@ import java.io.IOException;
 public class MainFrame extends JFrame {
     public final LoadController loadController;
     public final AlgorithmController algorithmController;
+    public final SaveController saveController;
     public final Config config;
 
     public MainFrame() {
         super("Graph Visualizer");
         loadController = new LoadController(this);
         algorithmController = new AlgorithmController();
+        saveController = new SaveController();
         config = new Config();
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -31,7 +34,7 @@ public class MainFrame extends JFrame {
         add(canvas);
         add(sidebar.buildSidebar(config, algorithmController, canvas), BorderLayout.EAST);
 
-        MenuBar menuBar = new MenuBar();
-        setJMenuBar(menuBar.buildMenuBar(config, loadController));
+        MenuBar menuBar = new MenuBar(this);
+        setJMenuBar(menuBar.buildMenuBar(config, loadController, saveController, canvas));
     }
 }
