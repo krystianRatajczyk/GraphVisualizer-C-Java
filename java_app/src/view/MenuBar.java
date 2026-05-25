@@ -1,39 +1,66 @@
 package view;
 
-import controller.AlgorithmController;
 import controller.LoadController;
+import controller.SaveController;
 import model.Config;
-import model.Graph;
+import view.Canvas;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 
 public class MenuBar {
-    private final JFrame parent;
+    private JFrame parent;
 
     public MenuBar(JFrame parent) {
         this.parent = parent;
     }
 
-    public JMenuBar buildMenuBar(Config config, LoadController loadController, AlgorithmController algorithmController) {
+    public JMenuBar buildMenuBar(Config config, LoadController loadController, SaveController saveController, Canvas canvas) {
         JMenuBar menuBar = new JMenuBar();
         menuBar.setLayout(new FlowLayout(FlowLayout.LEFT));
 
-        JButton generateButton = getGenerateButton(config, algorithmController);
-        JButton loadButton = getLoadButton(config, loadController);
+        JButton loadButton = getLoadButton(config, loadController, canvas);
+        JButton saveButton = getSaveButton(canvas, config, saveController);
 
         menuBar.add(loadButton);
-        menuBar.add(generateButton);
+        menuBar.add(saveButton);
 
         return menuBar;
     }
 
-    private JButton getLoadButton(Config config, LoadController loadController) {
+    private JButton getSaveButton(Canvas canvas, Config config, SaveController saveController) {
+        JButton saveButton = new JButton("Save");
+
+        saveButton.setEnabled(false);
+        canvas.setOnGraphSet(hasGraph -> saveButton.setEnabled(hasGraph));
+
+        saveButton.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            if (config.getInputFile() != null) {
+                String baseName = config.getInputFile().getName().replaceAll("\\.[^.]+$", "");
+                chooser.setSelectedFile(new File(baseName + ".png"));
+            }
+
+            if (chooser.showSaveDialog(parent) != JFileChooser.APPROVE_OPTION) return;
+
+            try {
+                saveController.save(canvas, chooser.getSelectedFile());
+            } catch (IOException exception) {
+                JOptionPane.showMessageDialog(parent, "Cannot save graph", "Runtime error", JOptionPane.PLAIN_MESSAGE);
+            }
+        });
+
+        return saveButton;
+    }
+
+    private JButton getLoadButton(Config config, LoadController loadController, Canvas canvas) {
         JButton loadButton = new JButton("Load Graph");
         loadButton.addActionListener(e -> {
             if (config.getInputFile() != null) {
                 config.setInputFile(null);
+                canvas.clear();
                 loadButton.setText("Load Graph");
                 return;
             }
@@ -44,33 +71,5 @@ public class MenuBar {
         });
 
         return loadButton;
-    }
-
-    private JButton getGenerateButton(Config config, AlgorithmController algorithmController) {
-        JButton generateButton = new JButton("Generate");
-
-        generateButton.addActionListener(e -> {
-            if (config.getInputFile() == null) {
-                JOptionPane.showMessageDialog(parent, "Choose file first", "No file", JOptionPane.PLAIN_MESSAGE);
-                return;
-            }
-            if (config.getAlgorithm() == null || config.getAlgorithm().isEmpty()) {
-                JOptionPane.showMessageDialog(parent, "Choose algorithm variant in the Control Panel", "No algorithm", JOptionPane.PLAIN_MESSAGE);
-                return;
-            }
-
-            try {
-                Graph graph = algorithmController.runAlgorithm(config);
-
-                if (graph != null) {
-                    JOptionPane.showMessageDialog(parent,
-                            "Graph loaded successfully !\n" + "Edges: " + graph.getEdges().size() +
-                                    " Vertices: " + graph.getVertices().size(), "Info", JOptionPane.PLAIN_MESSAGE);
-                }
-            } catch (IOException exception) {
-                JOptionPane.showMessageDialog(parent, exception.getMessage(), "Runtime error", JOptionPane.PLAIN_MESSAGE);
-            }
-        });
-        return generateButton;
     }
 }

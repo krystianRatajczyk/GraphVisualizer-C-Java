@@ -1,115 +1,171 @@
 package view;
 
 import controller.AlgorithmController;
-import controller.LoadController;
 import model.Config;
 import model.Graph;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.io.IOException;
 
-
 public class Sidebar extends JPanel {
-    private final Canvas canvas;
     private final JFrame parent;
-    private final Config config;
-    private final LoadController loadController;
-    private final AlgorithmController algorithmController;
 
-    public Sidebar(Canvas canvas, JFrame parent, Config config, LoadController loadController, AlgorithmController algorithmController) {
-        this.canvas = canvas;
+    public Sidebar(JFrame parent) {
+        setPreferredSize(new Dimension(350, 0));
+        setBackground(Color.WHITE);
         this.parent = parent;
-        this.config = config;
-        this.loadController = loadController;
-        this.algorithmController = algorithmController;
-        initUI();
     }
 
-    private void initUI() {
-        setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(220, 0));
-
-        JPanel top = new JPanel();
-        top.setLayout(new BoxLayout(top, BoxLayout.Y_AXIS));
-        top.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
-
-        JLabel title = new JLabel("Control Panel");
-        title.setAlignmentX(Component.LEFT_ALIGNMENT);
-        top.add(title);
-
-        top.add(Box.createRigidArea(new Dimension(0,8)));
-
-        JLabel algoLabel = new JLabel("Algorithm variant:");
-        algoLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        top.add(algoLabel);
-
-        String[] algorithms = {"Fruchterman-Reingold", "Tutte"};
-        JComboBox<String> algorithmCombo = new JComboBox<>(algorithms);
-        algorithmCombo.setAlignmentX(Component.LEFT_ALIGNMENT);
-        algorithmCombo.addActionListener(e -> config.setAlgorithm((String) algorithmCombo.getSelectedItem()));
-        top.add(algorithmCombo);
-
-        top.add(Box.createRigidArea(new Dimension(0,8)));
-
+    private JButton getGenerateButton(JComboBox<String> algorithm, Config config, AlgorithmController algorithmController, Canvas canvas) {
         JButton generateButton = new JButton("Generate");
-        generateButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         generateButton.addActionListener(e -> {
             if (config.getInputFile() == null) {
                 JOptionPane.showMessageDialog(parent, "Choose file first", "No file", JOptionPane.PLAIN_MESSAGE);
                 return;
             }
+            config.setAlgorithm((String) algorithm.getSelectedItem());
 
             try {
                 Graph graph = algorithmController.runAlgorithm(config);
+
                 if (graph != null) {
                     JOptionPane.showMessageDialog(parent,
-                            "Graph loaded successfully !\n" + "Edges: " + graph.getEdges().size() +
+                            "Graph generated successfully !\n" + "Edges: " + graph.getEdges().size() +
                                     " Vertices: " + graph.getVertices().size(), "Info", JOptionPane.PLAIN_MESSAGE);
+                    canvas.setGraph(graph);
                 }
             } catch (IOException exception) {
                 JOptionPane.showMessageDialog(parent, exception.getMessage(), "Runtime error", JOptionPane.PLAIN_MESSAGE);
             }
         });
-        top.add(generateButton);
+        return generateButton;
+    }
 
-        top.add(Box.createRigidArea(new Dimension(0,8)));
+    private JPanel buildAlgorithmSection(Config config, AlgorithmController algorithmController, Canvas canvas) {
+        JPanel section = new JPanel(new BorderLayout());
+        section.setOpaque(false);
+        section.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JCheckBox idsCheckbox = new JCheckBox("Show vertex IDs");
-        idsCheckbox.setAlignmentX(Component.LEFT_ALIGNMENT);
-        idsCheckbox.addActionListener(e -> canvas.setShowIds(idsCheckbox.isSelected()));
-        top.add(idsCheckbox);
+        String[] algorithms = {"Fruchterman-Reingold", "Tutte"};
+        JComboBox<String> algorithm = new JComboBox<>(algorithms);
 
-        JCheckBox thicknessCheckbox = new JCheckBox("Show edge thickness");
-        thicknessCheckbox.setAlignmentX(Component.LEFT_ALIGNMENT);
-        thicknessCheckbox.addActionListener(e -> canvas.setShowEdgeThickness(thicknessCheckbox.isSelected()));
-        top.add(thicknessCheckbox);
+        JButton generateButton = getGenerateButton(algorithm, config, algorithmController, canvas);
 
-        top.add(Box.createRigidArea(new Dimension(0,8)));
+        JLabel algorithmLabel = new JLabel("Choose algorithm");
+        algorithmLabel.setFont(algorithmLabel.getFont().deriveFont(16f));
+        algorithmLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0)); // spacing
 
-        JLabel modeLabel = new JLabel("Render mode:");
-        modeLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        top.add(modeLabel);
+        JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        controls.setOpaque(false);
+        controls.add(algorithm);
+        controls.add(generateButton);
 
-        JRadioButton normalMode = new JRadioButton("Normal", true);
-        normalMode.setAlignmentX(Component.LEFT_ALIGNMENT);
-        JRadioButton contrastMode = new JRadioButton("High contrast");
-        contrastMode.setAlignmentX(Component.LEFT_ALIGNMENT);
-        ButtonGroup modeGroup = new ButtonGroup();
-        modeGroup.add(normalMode);
-        modeGroup.add(contrastMode);
-        top.add(normalMode);
-        top.add(contrastMode);
+        section.add(algorithmLabel, BorderLayout.NORTH);
+        section.add(controls, BorderLayout.CENTER);
+        return section;
+    }
 
-        top.add(Box.createRigidArea(new Dimension(0,8)));
+    private JPanel buildControlsSection(Config config, Canvas canvas) {
+        JPanel section = new JPanel(new BorderLayout());
+        section.setOpaque(false);
+        section.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        top.add(Box.createVerticalGlue());
+        JLabel controlsLabel = new JLabel("Options");
+        controlsLabel.setFont(controlsLabel.getFont().deriveFont(16f));
+        controlsLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
-        JButton clearButton = new JButton("Clear");
-        clearButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JPanel checkboxes = new JPanel();
+        checkboxes.setLayout(new BoxLayout(checkboxes, BoxLayout.Y_AXIS));
+        checkboxes.setOpaque(false);
+
+        JCheckBox vertexIds = new JCheckBox("Show vertex IDs");
+        JCheckBox edgeNames = new JCheckBox("Show edge names");
+        JCheckBox edgeWeights = new JCheckBox("Show edge weights");
+
+        checkboxes.add(vertexIds);
+        checkboxes.add(edgeNames);
+        checkboxes.add(edgeWeights);
+
+        vertexIds.addActionListener(e -> {
+            config.setShowIds(!config.getShowIds());
+            canvas.repaint();
+        });
+
+        edgeNames.addActionListener(e -> {
+            config.setShowEdgeNames(!config.getShowEdgeNames());
+            canvas.repaint();
+        });
+
+        edgeWeights.addActionListener(e -> {
+            config.setShowEdgeWeights(!config.getShowEdgeWeights());
+            canvas.repaint();
+        });
+
+        JButton clearButton = new JButton("Clear canvas");
         clearButton.addActionListener(e -> canvas.clear());
-        top.add(clearButton);
 
-        add(top, BorderLayout.NORTH);
+        JPanel clearButtonWrapper = new JPanel(new BorderLayout());
+        clearButtonWrapper.setOpaque(false);
+        clearButtonWrapper.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        clearButtonWrapper.add(clearButton, BorderLayout.CENTER);
+
+        section.add(controlsLabel, BorderLayout.NORTH);
+        section.add(checkboxes, BorderLayout.CENTER);
+        section.add(clearButtonWrapper, BorderLayout.SOUTH);
+
+        return section;
+    }
+
+    private JPanel buildDegreeScale() {
+        JPanel section = new JPanel(new BorderLayout());
+        section.setOpaque(false);
+        section.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel degreeLabel = new JLabel("Vertex Degree");
+        degreeLabel.setFont(degreeLabel.getFont().deriveFont(16f));
+        degreeLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+
+        JPanel gradient = new JPanel() {
+            @Override
+            public void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                int w = getWidth();
+                for (int i = 0; i < w; i++) {
+                    float t = (float) i / (w - 1);
+                    g.setColor(Color.getHSBColor(0.66f - t * 0.66f, 1f, 0.85f));
+                    g.fillRect(i, 0, 1, getHeight());
+                }
+            }
+        };
+
+        JPanel labels = new JPanel(new BorderLayout());
+        labels.setOpaque(false);
+        labels.add(new JLabel("Less"), BorderLayout.WEST);
+        labels.add(new JLabel("More"), BorderLayout.EAST);
+
+        section.add(degreeLabel, BorderLayout.NORTH);
+        section.add(gradient, BorderLayout.CENTER);
+        section.add(labels, BorderLayout.SOUTH);
+
+
+        return section;
+    }
+
+    public JPanel buildSidebar(Config config, AlgorithmController algorithmController, Canvas canvas) {
+        setLayout(new BorderLayout());
+        JPanel stackWrapper = new JPanel();
+        stackWrapper.setLayout(new BoxLayout(stackWrapper, BoxLayout.Y_AXIS));
+
+        stackWrapper.add(buildAlgorithmSection(config, algorithmController, canvas));
+        stackWrapper.add(buildControlsSection(config, canvas));
+        stackWrapper.add(buildDegreeScale());
+
+        stackWrapper.setOpaque(false);
+
+        add(stackWrapper, BorderLayout.NORTH);
+        return this;
     }
 }
