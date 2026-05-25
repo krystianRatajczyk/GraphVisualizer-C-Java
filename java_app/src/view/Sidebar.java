@@ -104,11 +104,21 @@ public class Sidebar extends JPanel {
             canvas.repaint();
         });
 
+        JButton clearButton = new JButton("Clear canvas");
+        clearButton.addActionListener(e -> canvas.clear());
+
+        JPanel clearButtonWrapper = new JPanel(new BorderLayout());
+        clearButtonWrapper.setOpaque(false);
+        clearButtonWrapper.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        clearButtonWrapper.add(clearButton, BorderLayout.CENTER);
+
         section.add(controlsLabel, BorderLayout.NORTH);
         section.add(checkboxes, BorderLayout.CENTER);
+        section.add(clearButtonWrapper, BorderLayout.SOUTH);
 
         return section;
     }
+
     private JPanel buildDegreeScale() {
         JPanel section = new JPanel(new BorderLayout());
         section.setOpaque(false);
@@ -139,7 +149,6 @@ public class Sidebar extends JPanel {
         section.add(degreeLabel, BorderLayout.NORTH);
         section.add(gradient, BorderLayout.CENTER);
         section.add(labels, BorderLayout.SOUTH);
-
 
 
         return section;
