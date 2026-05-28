@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 public class Canvas extends JPanel {
     private Graph graph;
     private double offsetX, offsetY, scale, yMin, xMin;
+    private double initialOffsetX, initialOffsetY, initialScale;
     private double panX, panY;
     private double zoomFactor = 1.0;
     private Point dragStart;
@@ -26,6 +27,16 @@ public class Canvas extends JPanel {
 
     public void setOnGraphSet(Consumer<Boolean> onGraphSet) {
         this.onGraphSet = onGraphSet;
+    }
+
+    public void centerGraph() {
+        panX = 0;
+        panY = 0;
+        zoomFactor = 1.0;
+        scale = initialScale;
+        offsetX = initialOffsetX;
+        offsetY = initialOffsetY;
+        repaint();
     }
 
     public void clear() {
@@ -138,6 +149,10 @@ public class Canvas extends JPanel {
 
         double offsetX = padding + (usableWidth - (deltaX * scale)) / 2;
         double offsetY = padding + (usableHeight - (deltaY * scale)) / 2;
+
+        initialScale = scale;
+        initialOffsetX = offsetX;
+        initialOffsetY = offsetY;
 
         this.scale = scale;
         this.offsetX = offsetX;

@@ -119,7 +119,7 @@ public class Sidebar extends JPanel {
         return section;
     }
 
-    private JPanel buildDegreeScale() {
+    private JPanel buildDegreeScale(Canvas canvas) {
         JPanel section = new JPanel(new BorderLayout());
         section.setOpaque(false);
         section.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -142,9 +142,18 @@ public class Sidebar extends JPanel {
         };
 
         JPanel labels = new JPanel(new BorderLayout());
+        JButton centerGraph = new JButton("Center graph");
+        JPanel centerGraphSection = new JPanel(new BorderLayout());
+
+        centerGraph.addActionListener(e-> canvas.centerGraph());
+        centerGraphSection.setBorder(BorderFactory.createEmptyBorder(10,0,0,0));
+        centerGraphSection.setOpaque(false);
+        centerGraphSection.add(centerGraph, BorderLayout.CENTER);
+
         labels.setOpaque(false);
         labels.add(new JLabel("Less"), BorderLayout.WEST);
         labels.add(new JLabel("More"), BorderLayout.EAST);
+        labels.add(centerGraphSection, BorderLayout.SOUTH);
 
         section.add(degreeLabel, BorderLayout.NORTH);
         section.add(gradient, BorderLayout.CENTER);
@@ -161,7 +170,7 @@ public class Sidebar extends JPanel {
 
         stackWrapper.add(buildAlgorithmSection(config, algorithmController, canvas));
         stackWrapper.add(buildControlsSection(config, canvas));
-        stackWrapper.add(buildDegreeScale());
+        stackWrapper.add(buildDegreeScale(canvas));
 
         stackWrapper.setOpaque(false);
 
