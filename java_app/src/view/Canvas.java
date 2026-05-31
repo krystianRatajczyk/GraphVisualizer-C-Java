@@ -14,8 +14,7 @@ import java.util.function.Consumer;
 
 public class Canvas extends JPanel {
     private Graph graph;
-    private double offsetX, offsetY, scale, yMin, xMin;
-    private double initialOffsetX, initialOffsetY, initialScale;
+    private double offsetX, offsetY, scale, yMin, xMin, yMax, xMax;
     private double panX, panY;
     private double zoomFactor = 1.0;
     private Point dragStart;
@@ -24,24 +23,40 @@ public class Canvas extends JPanel {
     private Vertex draggingVertex = null;
     private final Config config;
     private Consumer<Boolean> onGraphSet;
+    private Consumer<Graph> onGraphLoaded;
+    private final int padding = 30;
+    private int mouseScreenX, mouseScreenY;
 
     public void setOnGraphSet(Consumer<Boolean> onGraphSet) {
         this.onGraphSet = onGraphSet;
+    }
+
+    public void setOnGraphLoaded(Consumer<Graph> onGraphLoaded) {
+        this.onGraphLoaded = onGraphLoaded;
     }
 
     public void centerGraph() {
         panX = 0;
         panY = 0;
         zoomFactor = 1.0;
-        scale = initialScale;
-        offsetX = initialOffsetX;
-        offsetY = initialOffsetY;
+
+        xMax = Double.MIN_VALUE; xMin = Double.MAX_VALUE;
+        yMax = Double.MIN_VALUE; yMin = Double.MAX_VALUE;
+        for (Vertex v : graph.getVertices()) {
+            xMax = Math.max(xMax, v.getX());
+            xMin = Math.min(xMin, v.getX());
+            yMax = Math.max(yMax, v.getY());
+            yMin = Math.min(yMin, v.getY());
+        }
+
+        calculateProperties();
         repaint();
     }
 
     public void clear() {
         this.graph = null;
         if (onGraphSet != null) onGraphSet.accept(false);
+        if (onGraphLoaded != null) onGraphLoaded.accept(null);
         repaint();
     }
 
@@ -50,7 +65,11 @@ public class Canvas extends JPanel {
         MouseAdapter mouseAdapter = new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
+                mouseScreenX = e.getX();
+                mouseScreenY = e.getY();
+
                 if (graph == null) {
+                    repaint();
                     return;
                 }
 
@@ -92,6 +111,9 @@ public class Canvas extends JPanel {
                 int dy = e.getY() - dragStart.y;
                 dragStart = e.getPoint();
 
+                mouseScreenX = e.getX();
+                mouseScreenY = e.getY();
+
                 if (draggingVertex != null) {
                     draggingVertex.setX(draggingVertex.getX() + dx / (scale * zoomFactor));
                     draggingVertex.setY(draggingVertex.getY() - dy / (scale * zoomFactor));
@@ -119,29 +141,13 @@ public class Canvas extends JPanel {
         addMouseWheelListener(mouseAdapter);
     }
 
-    public void setGraph(Graph graph) {
-        this.graph = graph;
-        if (onGraphSet != null) onGraphSet.accept(true);
-        panX = 0;
-        panY = 0;
-        zoomFactor = 1.0;
-        double xMax = Double.MIN_VALUE, xMin = Double.MAX_VALUE;
-        double yMax = Double.MIN_VALUE, yMin = Double.MAX_VALUE;
-
-        for (Vertex v : graph.getVertices()) {
-            xMax = Math.max(xMax, v.getX());
-            xMin = Math.min(xMin, v.getX());
-            yMax = Math.max(yMax, v.getY());
-            yMin = Math.min(yMin, v.getY());
-        }
-
+    public void calculateProperties() {
         double deltaX = xMax - xMin;
         double deltaY = yMax - yMin;
 
         if (deltaX == 0) deltaX = 1;
         if (deltaY == 0) deltaY = 1;
 
-        int padding = 30;
         int usableWidth = getWidth() - (2 * padding);
         int usableHeight = getHeight() - (2 * padding);
 
@@ -150,15 +156,32 @@ public class Canvas extends JPanel {
         double offsetX = padding + (usableWidth - (deltaX * scale)) / 2;
         double offsetY = padding + (usableHeight - (deltaY * scale)) / 2;
 
-        initialScale = scale;
-        initialOffsetX = offsetX;
-        initialOffsetY = offsetY;
-
         this.scale = scale;
         this.offsetX = offsetX;
         this.offsetY = offsetY;
-        this.yMin = yMin;
-        this.xMin = xMin;
+    }
+
+    public void setGraph(Graph graph) {
+        this.graph = graph;
+        if (onGraphSet != null) onGraphSet.accept(true);
+        if (onGraphLoaded != null) onGraphLoaded.accept(graph);
+        panX = 0;
+        panY = 0;
+        zoomFactor = 1.0;
+
+        xMax = Double.MIN_VALUE;
+        xMin = Double.MAX_VALUE;
+        yMax = Double.MIN_VALUE;
+        yMin = Double.MAX_VALUE;
+
+        for (Vertex v : graph.getVertices()) {
+            xMax = Math.max(xMax, v.getX());
+            xMin = Math.min(xMin, v.getX());
+            yMax = Math.max(yMax, v.getY());
+            yMin = Math.min(yMin, v.getY());
+        }
+
+        calculateProperties();
 
         repaint();
     }
@@ -227,7 +250,13 @@ public class Canvas extends JPanel {
                 String text = String.valueOf(v.getId());
                 g.drawString(text, x + (text.length() > 1 ? -7 : -3), y + 5);
             }
-
         }
+
+        double S = scale * zoomFactor;
+        double gx = xMin + (mouseScreenX - offsetX - panX) / S;
+        double gy = yMin + (getHeight() - offsetY - panY - mouseScreenY) / S;
+        g.setColor(Color.DARK_GRAY);
+        g.setFont(new Font("Arial", Font.PLAIN, 11));
+        g.drawString(String.format("x: %.2f  y: %.2f", gx, gy), 8, getHeight() - 8);
     }
 }

@@ -145,8 +145,8 @@ public class Sidebar extends JPanel {
         JButton centerGraph = new JButton("Center graph");
         JPanel centerGraphSection = new JPanel(new BorderLayout());
 
-        centerGraph.addActionListener(e-> canvas.centerGraph());
-        centerGraphSection.setBorder(BorderFactory.createEmptyBorder(10,0,0,0));
+        centerGraph.addActionListener(e -> canvas.centerGraph());
+        centerGraphSection.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         centerGraphSection.setOpaque(false);
         centerGraphSection.add(centerGraph, BorderLayout.CENTER);
 
@@ -159,7 +159,42 @@ public class Sidebar extends JPanel {
         section.add(gradient, BorderLayout.CENTER);
         section.add(labels, BorderLayout.SOUTH);
 
+        return section;
+    }
 
+    private JPanel buildStatisticsSection(Canvas canvas) {
+        JPanel section = new JPanel(new BorderLayout());
+        section.setOpaque(false);
+        section.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel title = new JLabel();
+        title.setFont(title.getFont().deriveFont(16f));
+        title.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+
+        JLabel verticesLabel = new JLabel();
+        JLabel edgesLabel = new JLabel();
+        JLabel avgDegreeLabel = new JLabel();
+
+        JPanel stats = new JPanel();
+        stats.setLayout(new BoxLayout(stats, BoxLayout.Y_AXIS));
+        stats.setOpaque(false);
+        stats.add(verticesLabel);
+        stats.add(edgesLabel);
+        stats.add(avgDegreeLabel);
+
+        canvas.setOnGraphLoaded(graph -> {
+            if (graph != null) {
+                int v = graph.getVertices().size();
+                int e = graph.getEdges().size();
+                title.setText("Statistics");
+                verticesLabel.setText("Vertices: " + v);
+                edgesLabel.setText("Edges: " + e);
+                avgDegreeLabel.setText(String.format("Avg degree: %.2f", v > 0 ? (2.0 * e / v) : 0));
+            }
+        });
+
+        section.add(title, BorderLayout.NORTH);
+        section.add(stats, BorderLayout.CENTER);
         return section;
     }
 
@@ -171,6 +206,7 @@ public class Sidebar extends JPanel {
         stackWrapper.add(buildAlgorithmSection(config, algorithmController, canvas));
         stackWrapper.add(buildControlsSection(config, canvas));
         stackWrapper.add(buildDegreeScale(canvas));
+        stackWrapper.add(buildStatisticsSection(canvas));
 
         stackWrapper.setOpaque(false);
 
