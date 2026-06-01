@@ -9,11 +9,11 @@ obj/
 
 # Temporary / Output files
 *.o
-*.txt
 *.bin
 !examples/*.txt
 java_app/out
-res/*.txt
+java_app/res/*.txt
 .idea
 .vscode
+java_app/target/*
 out
